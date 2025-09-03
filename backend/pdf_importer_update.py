@@ -12,7 +12,7 @@ load_dotenv()
 
 # 데이터베이스 연결 정보 설정
 CONNECTION_STRING = f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-COLLECTION_NAME = "homepage_pdfplumner_1st"
+COLLECTION_NAME = "homepage_pdfplumner_1st" # 컬렉션 이름을 좀 더 일반적인 이름으로 변경
 
 def create_vector_store():
     data_dir = "data"
@@ -21,7 +21,7 @@ def create_vector_store():
         return None
 
     pdf_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.lower().endswith('.pdf')]
-    pdf_files = pdf_files[:1] # <-- 이 한 줄만 추가! (처음 100개만 선택)
+    pdf_files = pdf_files[1581:1600]
     print(f"***** 총 {len(pdf_files)}개의 파일로 첫 번째 배치를 처리합니다. *****")
     
     if not pdf_files:
@@ -44,6 +44,7 @@ def create_vector_store():
                     page_metadata = {"source": pdf_path, "page": i + 1}
                     page_text = page.extract_text()
                     if page_text:
+                        page_text = page_text.replace('\x00', '') # <-- nul 제거를위해 이 한 줄 추가!
                         documents.append(Document(page_content=page_text, metadata=page_metadata))
 
                     # 페이지에서 표 추출
@@ -95,13 +96,22 @@ def create_vector_store():
     )
     print("*****임베딩 모델 로드 완료.")
 
-    # PGVector를 사용해 벡터 저장소 생성
-    db = PGVector.from_documents(
-        embedding=embeddings,
-        documents=docs,
+    # 기존 컬렉션에 연결
+    db = PGVector(
         collection_name=COLLECTION_NAME,
         connection_string=CONNECTION_STRING,
+        embedding_function=embeddings,
     )
+
+    # 새 문서 추가
+    # db.add_documents(docs)
+
+    # 새 문서 추가 (배치 처리)
+    batch_size = 50
+    for i in tqdm(range(0, len(docs), batch_size), desc="문서 배치 추가 중"):
+        db.add_documents(docs[i:i+batch_size])
+
+
 
     print("*****PostgreSQL에 벡터 저장소 생성 완료.")
     return db
