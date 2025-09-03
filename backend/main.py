@@ -23,7 +23,7 @@ from langchain_core.messages import SystemMessage
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_core.documents import Document # Document 타입 힌트용으로 추가
-from pdf_importer import create_vector_store, CONNECTION_STRING, COLLECTION_NAME
+# from pdf_importer import create_vector_store, CONNECTION_STRING, COLLECTION_NAME
 
 
 
