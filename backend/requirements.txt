@@ -16,3 +16,4 @@ unstructured
 pdfplumber
 pandas
 tabulate
+slowapi==0.1.9
