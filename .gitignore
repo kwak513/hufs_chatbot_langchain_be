@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+venv/
+.venv/
+
+
+.env
+
+*.log
+
+build/
+dist/
+*.egg-info/
+
+.ipynb_checkpoints/
+
+.DS_Store
+
+# 데이터 파일
+data/
+*.pdf
+
+# VS Code settings
+.vscode/
